@@ -6,8 +6,57 @@ import "react-toastify/dist/ReactToastify.css";
 import { useForm } from "react-hook-form";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import app from "../../../firebase.config";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useContext } from "react";
+
+import {
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  getAuth,
+  signInWithPopup,
+} from "firebase/auth";
+import { myContext } from "../../providers/Context";
 
 const Login = () => {
+  const auth = getAuth(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+  const [error, setError] = useState("");
+
+  const { loggedInUser, setUser } = useContext(myContext);
+  const handleLogin = event => {
+    event.preventDefault();
+    const form = event.target;
+    const email = form.email.value;
+    const password = form.password.value;
+    loggedInUser(email, password)
+      .then(result => {
+        const loggedUser = result.user;
+        setUser(loggedUser);
+        form.reset();
+        toast("LogOut successfully!!!");
+        navigate(from, { replace: true });
+      })
+      .catch(error => setError(error.message));
+  };
+
+  const handleGoogleLogIn = () => {
+    signInWithPopup(auth, googleProvider)
+      .then(result => {
+        const googleUser = result.user;
+        console.log(googleUser);
+        setUser(googleUser);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
   const {
     register,
     handleSubmit,
@@ -35,7 +84,7 @@ const Login = () => {
         />
         <div className="">
           <form
-            // onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleLogin}
             className="bg-[#e5e7eb]  px-5 py-4 rounded-t-2xl md:ml-5 md:px-8 md:py-5">
             <h2 className="text-4xl text-center  font-bold mb-6 text-black">
               Login
@@ -65,6 +114,7 @@ const Login = () => {
                 htmlFor="password">
                 Password
               </label>
+
               <input
                 className="border-b-2 border-gray-300 focus:border-blue-500 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="password"
@@ -90,7 +140,7 @@ const Login = () => {
               </button>
             </div>
             <p className="text-red-900 font-semibold text-xl mb-5 mt-3">
-              errorrrrr
+              {error}
             </p>
             <div className="divider">OR</div>
             <div className="flex md:flex-row flex-col justify-center">
@@ -99,7 +149,7 @@ const Login = () => {
                   background:
                     "linear-gradient(to bottom, #0f0c29, #302b63, #24243e)",
                 }}
-                // onClick={handleGoogleLogIn}
+                onClick={handleGoogleLogIn}
                 className="btn btn-outline md:mx-2 mt-4 text-white px-4">
                 <FaGoogle className="mr-3 text-2xl" />
                 Continue with Google

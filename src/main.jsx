@@ -5,6 +5,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import MainLayout from "./MainLayout/MainLayout";
 import Login from "./pages/Shared/Login";
 import Register from "./pages/Shared/Register";
+import Context from "./providers/Context";
+import ControlLayout from "./ControlLayout/ControlLayout";
 
 const router = createBrowserRouter([
   {
@@ -13,11 +15,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-          <div>
-            thiss iss hommeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-          </div>
-        ),
+        element: <div></div>,
       },
       {
         path: "/login",
@@ -29,9 +27,15 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "/control",
+    element: <ControlLayout />,
+  },
 ]);
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Context>
+      <RouterProvider router={router} />
+    </Context>
   </React.StrictMode>
 );
